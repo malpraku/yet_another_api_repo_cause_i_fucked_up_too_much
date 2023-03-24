@@ -19,13 +19,22 @@ class AuthController extends Controller
         ]);
 
         $validate["password"] = Hash::make($request->password);
-
         $user = User::create($validateData);
-
         $accessToken = $user->createToken("authToken")->accessToken;
-
         return response(["user"->$user,"access_token"=>$accessToken], 201);
     }
 
-    public func
+    public function login (Request $request){
+        $loginData = $request->validate([
+            "email" => "email|required",
+            "password" => "required"
+        ]);
+
+        if(!auth()->attempt($loginData)){
+            return response(["message" => "User ini tidak terdaftar, silahkan cek kembali"], 400);
+        }
+
+        $accessToken = auth()->user()->createToken("authToken")->accessToken;
+        return response(["user"->auth()->user(), "access_token"=>$accessToken]);
+    }
 }
